@@ -1,0 +1,5 @@
+Rekurencyjny autoenkoder do kompresji audio, zoptymalizowany do ludzkiego głosu
+Do zastosowań w warunkach ograniczonej łączności
+Porównania z innymi metodami kompresji
+Funkcje odszumiania, przesyłu analogowo i cyfrowo
+implementacja na mikrokontrolerze lub komputerze w aplikacji
