@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from matplotlib.pyplot import plot, show
 import numpy as np 
 
-dataset = SpeechDataset(filename='dataset/lalka.wav', compression_ratio=3, buffer_len=4096, prediction_shift=1)
+dataset = SpeechDataset(filename='dataset/lalka_test.wav', compression_ratio=3, buffer_len=4096, prediction_shift=1)
 
 model = torch.load('model.pt')
 
