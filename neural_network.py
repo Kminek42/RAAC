@@ -46,12 +46,19 @@ class Decoder(nn.Module):
         return x
 
 class RecurrentAutoencoder(nn.Module):
-    def __init__(self, *args, compress_ratio, transfer_bit_depth, memory_size, **kwargs) -> None:
+    def __init__(self, *args, compress_ratio, transfer_bit_depth, noise_level, memory_size, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.encoder = Encoder(compress_ratio=compress_ratio, transfer_bit_depth=transfer_bit_depth)
         self.decoder = Decoder(compress_ratio=compress_ratio, memory_size=memory_size)
+        self.noise_level = noise_level
      
     def forward(self, x):
+        compressed = self.encoder.encode(x)
+        compressed = compressed + self.noise_level * torch.randn(compressed.shape)
+        decompressed = self.decoder.decode(compressed)
+        return decompressed
+    
+    def forward_clean(self, x):
         compressed = self.encoder.encode(x)
         decompressed = self.decoder.decode(compressed)
         return decompressed
@@ -68,11 +75,16 @@ class AmplitudeSpectrumLoss(nn.Module):
         target_signals = target_signals * window
 
         # Compute the amplitude spectrum using the Fourier transform
-        # input_spectra = torch.log10(torch.abs(fft.fft(input_signals, dim=-1)) + 1e-7)
-        # target_spectra = torch.log10(torch.abs(fft.fft(target_signals, dim=-1)) + 1e-7)
+        input_spectra = torch.log10(torch.abs(fft.fft(input_signals, dim=-1)) + 1e-7)
+        target_spectra = torch.log10(torch.abs(fft.fft(target_signals, dim=-1)) + 1e-7)
 
-        input_spectra = torch.abs(fft.fft(input_signals, dim=-1))
-        target_spectra = torch.abs(fft.fft(target_signals, dim=-1))
+        # input_spectra = torch.abs(fft.fft(input_signals, dim=-1))
+        # target_spectra = torch.abs(fft.fft(target_signals, dim=-1))
+
+        # plot(input_spectra[0].detach().numpy())
+        # plot(target_spectra[0].detach().numpy())
+        # show()
+
         # Calculate the mean squared error between the amplitude spectra
         loss = nn.MSELoss()(input_spectra, target_spectra)
 

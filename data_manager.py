@@ -35,6 +35,11 @@ class SpeechDataset(Dataset):
         reminder = len(audio_tensor) % (compression_ratio * buffer_len)
         audio_tensor = audio_tensor[:-reminder]
         audio_tensor = audio_tensor.view(-1, buffer_len, compression_ratio)
+        
+        audio_tensor = audio_tensor - audio_tensor.min()
+        audio_tensor = audio_tensor / audio_tensor.max()
+        audio_tensor = audio_tensor * 2
+        audio_tensor = audio_tensor - 1
 
         self.data = audio_tensor
         self.buffer_len = buffer_len

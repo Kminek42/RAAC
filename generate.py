@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from matplotlib.pyplot import plot, show
 import numpy as np 
 
-dataset = SpeechDataset(filename='dataset/lalka_test.wav', compression_ratio=3, buffer_len=4096, prediction_shift=1)
+dataset = SpeechDataset(filename='dataset/Tadek_1.wav', compression_ratio=3, buffer_len=4096, prediction_shift=1)
 
 model = torch.load('model.pt')
 
@@ -22,7 +22,6 @@ output = model.encoder.encode(dataset.get_combined(0, 30)).view(-1).detach().num
 import numpy as np
 import zlib
 
-print(set(np.round(output, 4)))
 data = ((output+1)*8).astype(np.int8)
 plot(data)
 show()

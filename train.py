@@ -5,9 +5,9 @@ from data_manager import SpeechDataset
 from torch.utils.data import DataLoader
 from matplotlib.pyplot import plot, show
 
-dataset = SpeechDataset(filename='dataset/lalka_train.wav', compression_ratio=3, buffer_len=4096, prediction_shift=1)
+dataset = SpeechDataset(filename='dataset/tadek_7_2min.wav', compression_ratio=3, buffer_len=4096, prediction_shift=1)
 
-model = RecurrentAutoencoder(compress_ratio=3, transfer_bit_depth=4, memory_size=256)
+model = RecurrentAutoencoder(compress_ratio=3, transfer_bit_depth=4, noise_level=0.0, memory_size=256)
 
 training_loader = DataLoader(
     dataset=dataset,
@@ -24,7 +24,7 @@ Y = []
 
 best_loss = float('inf')
 n = 5
-for epoch in range(64):
+for epoch in range(16):
     loss_sum = 0
     for i, data in enumerate(training_loader):
         inputs, labels = data
