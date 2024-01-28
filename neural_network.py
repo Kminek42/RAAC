@@ -89,7 +89,6 @@ class AmplitudeSpectrumLoss(nn.Module):
         loss = nn.MSELoss()(input_spectra, target_spectra)
 
         return loss
-    
 
 class MelSpectrogramLoss(nn.Module):
     def __init__(self, sample_rate=16000):
