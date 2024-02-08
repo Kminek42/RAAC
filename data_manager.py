@@ -36,11 +36,6 @@ class SpeechDataset(Dataset):
         audio_tensor = audio_tensor[:-reminder]
         audio_tensor = audio_tensor.view(-1, buffer_len, compression_ratio)
         
-        audio_tensor = audio_tensor - audio_tensor.min()
-        audio_tensor = audio_tensor / audio_tensor.max()
-        audio_tensor = audio_tensor * 2
-        audio_tensor = audio_tensor - 1
-
         self.data = audio_tensor
         self.buffer_len = buffer_len
         self.compression_ratio = compression_ratio
@@ -49,7 +44,17 @@ class SpeechDataset(Dataset):
         return len(self.data)
  
     def __getitem__(self, index) -> any:
-        return self.data[index][self.shift:], self.data[index][:-self.shift]
+        # inputs and outputs
+        inputs = self.data[index][self.shift:]
+        outputs = self.data[index][:-self.shift]
+
+        # reduce amplitude by 0.5-1.0 factor
+        inputs = inputs * (0.5 + 0.5 * torch.rand((1)))
+
+        # add noise with random amplitude 
+        # inputs = inputs + 0.1 * torch.rand((1)) * torch.rand(inputs.shape)
+
+        return inputs, outputs
 
     def get_combined(self, t0, dt):
         return self.data[

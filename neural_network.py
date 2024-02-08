@@ -13,11 +13,11 @@ class Encoder(nn.Module):
         self.bit_depth = transfer_bit_depth
 
     def reduce_bit_depth(self, input_tensor, bit_depth):
-        max_value = 2**(bit_depth-1)  # -1 because one bit for sign
+        max_value = 2**bit_depth - 1
         input_tensor = input_tensor * max_value
         input_tensor = input_tensor + input_tensor.round().detach() - input_tensor.detach()
         
-        normalized_tensor = input_tensor / max_value
+        normalized_tensor = input_tensor / (max_value + 1)
         
         return normalized_tensor
 
@@ -25,7 +25,7 @@ class Encoder(nn.Module):
         x = self.linear1(x)
         x = self.activation(x)
         x = self.linear2(x)
-        x = self.activation(x)
+        x = torch.sigmoid(x)
         x = self.reduce_bit_depth(x, self.bit_depth)
         return x
     
@@ -71,15 +71,17 @@ class AmplitudeSpectrumLoss(nn.Module):
     def forward(self, input_signals, target_signals):
         # Apply window function to input and target signals
         window = self.window_fn(len(input_signals[0]))  # Assuming all signals in the batch have the same length
-        input_signals = input_signals * window
-        target_signals = target_signals * window
+        # input_signals = input_signals * window
+        # target_signals = target_signals * window
 
         # Compute the amplitude spectrum using the Fourier transform
-        input_spectra = torch.log10(torch.abs(fft.fft(input_signals, dim=-1)) + 1e-7)
-        target_spectra = torch.log10(torch.abs(fft.fft(target_signals, dim=-1)) + 1e-7)
+        input_spectra = fft.fft(input_signals, dim=-1, norm='forward')
+        input_spectra = torch.abs(input_spectra)
+        input_spectra = torch.log10(input_spectra + 1e-7)
 
-        # input_spectra = torch.abs(fft.fft(input_signals, dim=-1))
-        # target_spectra = torch.abs(fft.fft(target_signals, dim=-1))
+        target_spectra = fft.fft(target_signals, dim=-1, norm='forward')
+        target_spectra = torch.abs(target_spectra)
+        target_spectra = torch.log10(target_spectra + 1e-7) 
 
         # plot(input_spectra[0].detach().numpy())
         # plot(target_spectra[0].detach().numpy())
@@ -107,3 +109,13 @@ class MelSpectrogramLoss(nn.Module):
         loss = self.mse_loss(predicted_mel, target_mel)
 
         return loss
+
+
+# t = torch.linspace(0, 1, 1000)
+# y = torch.sin(2 * torch.pi * 100 * t)
+# input_spectra = fft.fft(y, norm='forward')
+# input_spectra = torch.abs(input_spectra)
+# input_spectra = torch.log10(input_spectra + 1e-7)
+# plot(input_spectra.detach().numpy())
+# show()
+# print(input_spectra.min())
